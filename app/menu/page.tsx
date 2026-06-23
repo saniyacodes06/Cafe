@@ -1,0 +1,77 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import { Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { menuItems, categories } from '@/lib/data'
+import MenuCard from '@/components/features/MenuCard'
+import CategoryPills from '@/components/features/CategoryPills'
+
+export default function MenuPage() {
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filtered = useMemo(() => {
+    let items = menuItems
+    if (selectedCategory !== 'all') {
+      const cat = categories.find(c => c.slug === selectedCategory)
+      if (cat) items = items.filter(i => i.categoryId === cat.id)
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      items = items.filter(i => i.name.toLowerCase().includes(q) || i.description.toLowerCase().includes(q))
+    }
+    return items
+  }, [selectedCategory, searchQuery])
+
+  return (
+    <div>
+      {/* Hero */}
+      <section className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
+        <div className="mx-auto max-w-[1200px] px-4 md:px-10">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Our Menu</h1>
+          <p className="text-muted-foreground">Discover handcrafted flavors made with the finest ingredients.</p>
+        </div>
+      </section>
+
+      {/* Filters */}
+      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="mx-auto max-w-[1200px] px-4 md:px-10 py-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <CategoryPills
+              categories={categories}
+              selected={selectedCategory}
+              onSelect={setSelectedCategory}
+            />
+            <div className="relative w-full md:w-64">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search menu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 rounded-full h-9 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid */}
+      <section className="py-10">
+        <div className="mx-auto max-w-[1200px] px-4 md:px-10">
+          {filtered.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-muted-foreground">No items found. Try a different filter.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filtered.map((item) => (
+                <MenuCard key={item.id} item={item} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  )
+}
