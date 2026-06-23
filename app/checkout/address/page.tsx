@@ -17,8 +17,8 @@ export default function AddressPage() {
   const [showAddForm, setShowAddForm] = useState(false)
 
   const savedAddresses = [
-    { id: '1', title: 'Home', fullAddress: '42 Manor Street', city: 'New York', state: 'NY', pincode: '10012', landmark: 'Near Central Park' },
-    { id: '2', title: 'Work', fullAddress: '350 Fifth Avenue', city: 'New York', state: 'NY', pincode: '10118', landmark: 'Empire State Building' },
+    { id: '1', title: 'Home', fullAddress: 'Plot No. 7, Sector 3', city: 'Old Panvel', state: 'Maharashtra', pincode: '410206', landmark: 'Near Panvel Station' },
+    { id: '2', title: 'Work', fullAddress: 'Shop No. 12, Panvel Mafco Market', city: 'Old Panvel', state: 'Maharashtra', pincode: '410206', landmark: 'Near Old Panvel Bus Stand' },
   ]
 
   return (

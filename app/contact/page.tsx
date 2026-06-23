@@ -20,8 +20,8 @@ export default function ContactPage() {
               <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
               <div className="space-y-4">
                 {[
-                  { icon: MapPin, label: 'Visit Us', value: '124 FlavorHub Street, Food District, NY 10001' },
-                  { icon: Phone, label: 'Call Us', value: '+1 (555) 352-8674' },
+                  { icon: MapPin, label: 'Visit Us', value: 'Shop 5, FlavorHub Plaza, Old Panvel, Navi Mumbai - 410206' },
+                  { icon: Phone, label: 'Call Us', value: '+91 98765 43210' },
                   { icon: Mail, label: 'Email Us', value: 'hello@flavorhub.com' },
                   { icon: Clock, label: 'Hours', value: 'Mon-Sat: 10:00 AM - 10:00 PM\nSunday: 10:00 AM - 8:00 PM' },
                 ].map((item) => {

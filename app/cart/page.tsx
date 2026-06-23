@@ -14,7 +14,7 @@ export default function CartPage() {
   const router = useRouter()
   const { items, clearCart } = useCart()
   const total = calculateCartTotal(items)
-  const deliveryFee = total >= 20 ? 0 : 2.99
+  const deliveryFee = total >= 299 ? 0 : 29
   const grandTotal = total + deliveryFee
 
   if (items.length === 0) {
@@ -67,7 +67,7 @@ export default function CartPage() {
                 <span>{deliveryFee === 0 ? <span className="text-green-600">Free</span> : formatPrice(deliveryFee)}</span>
               </div>
               {deliveryFee > 0 && (
-                <p className="text-xs text-muted-foreground">Free delivery on orders over {formatPrice(20)}</p>
+                <p className="text-xs text-muted-foreground">Free delivery on orders over {formatPrice(299)}</p>
               )}
               <Separator />
               <div className="flex justify-between font-semibold text-lg">

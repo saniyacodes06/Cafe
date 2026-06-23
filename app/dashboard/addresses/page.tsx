@@ -13,8 +13,8 @@ import EmptyState from '@/components/features/EmptyState'
 export default function DashboardAddressesPage() {
   const [showForm, setShowForm] = useState(false)
   const savedAddresses = [
-    { id: '1', title: 'Home', fullAddress: '42 Manor Street, New York, NY - 10012', landmark: 'Near Central Park', isDefault: true },
-    { id: '2', title: 'Work', fullAddress: '350 Fifth Avenue, New York, NY - 10118', landmark: 'Empire State Building', isDefault: false },
+    { id: '1', title: 'Home', fullAddress: 'Plot No. 7, Sector 3, Old Panvel, Maharashtra - 410206', landmark: 'Near Panvel Station', isDefault: true },
+    { id: '2', title: 'Work', fullAddress: 'Shop No. 12, Panvel Mafco Market, Old Panvel, Maharashtra - 410206', landmark: 'Near Old Panvel Bus Stand', isDefault: false },
   ]
 
   if (savedAddresses.length === 0 && !showForm) {

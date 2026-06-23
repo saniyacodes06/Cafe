@@ -26,7 +26,7 @@ export default function PaymentPage() {
   const [processing, setProcessing] = useState(false)
   
   const total = calculateCartTotal(items)
-  const deliveryFee = total >= 20 ? 0 : 2.99
+  const deliveryFee = total >= 299 ? 0 : 29
   const grandTotal = total + deliveryFee
 
   const handlePlaceOrder = () => {

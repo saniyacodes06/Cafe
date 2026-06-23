@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const { items } = useCart()
   const defaultAddress = addresses.find(a => a.isDefault) || addresses[0]
   const total = calculateCartTotal(items)
-  const deliveryFee = total >= 20 ? 0 : 2.99
+  const deliveryFee = total >= 299 ? 0 : 29
   const grandTotal = total + deliveryFee
 
   if (items.length === 0) {

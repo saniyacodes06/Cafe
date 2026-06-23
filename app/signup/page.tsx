@@ -45,7 +45,7 @@ export default function SignupPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" />
+              <Input id="phone" type="tel" placeholder="+91 98765 43210" pattern="[6-9]\d{9}" title="Enter a valid 10-digit Indian mobile number" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

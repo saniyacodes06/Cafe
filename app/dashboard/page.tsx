@@ -23,7 +23,7 @@ export default function DashboardPage() {
           <div className="flex-1">
             <h1 className="text-xl font-bold">John Doe</h1>
             <p className="text-sm text-muted-foreground">john.doe@email.com</p>
-            <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
+            <p className="text-sm text-muted-foreground">+91 98765 43210</p>
           </div>
           <Button variant="outline" size="sm" className="gap-2">
             <LogOut size={14} /> Sign Out

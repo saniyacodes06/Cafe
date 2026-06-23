@@ -35,9 +35,9 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-wider mb-4">Contact</h4>
             <div className="space-y-2 text-sm text-primary-foreground/60">
-              <p>124 FlavorHub Street</p>
-              <p>Food District, NY 10001</p>
-              <p>+1 (555) FLAVOR-HUB</p>
+              <p>Shop 5, FlavorHub Plaza</p>
+              <p>Old Panvel, Navi Mumbai - 410206</p>
+              <p>+91 98765 43210</p>
               <p>hello@flavorhub.com</p>
             </div>
           </div>
