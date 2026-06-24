@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, Check, Clock, ChefHat, Truck, CheckCircle, MapPin, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { getOrderById } from '@/lib/data'
+import { orders as ordersApi } from '@/lib/api'
 import { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS } from '@/lib/constants'
 import { formatPrice, formatDate, cn } from '@/lib/utils'
-import ReviewCard from '@/components/features/ReviewCard'
+import type { Order } from '@/types'
 
 const statusIcons: Record<string, React.ElementType> = {
   placed: Package,
@@ -24,8 +25,23 @@ export default function TrackOrderPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const isSuccess = searchParams.get('success') === 'true'
-  
-  const order = getOrderById(params.id as string)
+  const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    ordersApi.get(params.id as string)
+      .then(setOrder)
+      .finally(() => setLoading(false))
+  }, [params.id])
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-[800px] px-4 md:px-10 py-8">
+        <div className="h-8 bg-muted animate-pulse rounded w-1/3 mb-8" />
+        <div className="h-64 bg-muted animate-pulse rounded-xl mb-6" />
+      </div>
+    )
+  }
 
   if (!order) {
     return (
@@ -49,7 +65,6 @@ export default function TrackOrderPage() {
         <Link href="/orders"><ArrowLeft size={16} /> Back to Orders</Link>
       </Button>
 
-      {/* Success Banner */}
       {isSuccess && (
         <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-6 flex items-center gap-3">
           <CheckCircle size={20} className="text-green-600 shrink-0" />
@@ -67,7 +82,6 @@ export default function TrackOrderPage() {
         </Badge>
       </div>
 
-      {/* Progress Tracker */}
       <Card className="mb-8">
         <CardContent className="p-6">
           <div className="space-y-0">
@@ -116,7 +130,6 @@ export default function TrackOrderPage() {
         </CardContent>
       </Card>
 
-      {/* Order Items */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <h3 className="font-semibold mb-4">Order Items</h3>
@@ -142,25 +155,25 @@ export default function TrackOrderPage() {
         </CardContent>
       </Card>
 
-      {/* Delivery Address */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <MapPin size={16} className="text-primary" />
-            <h3 className="font-semibold">Delivery Address</h3>
-          </div>
-          <p className="font-medium">{order.deliveryAddress.title}</p>
-          <p className="text-sm text-muted-foreground">{order.deliveryAddress.fullAddress}, {order.deliveryAddress.city}, {order.deliveryAddress.state} - {order.deliveryAddress.pincode}</p>
-        </CardContent>
-      </Card>
+      {order.deliveryAddress && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin size={16} className="text-primary" />
+              <h3 className="font-semibold">Delivery Address</h3>
+            </div>
+            <p className="font-medium">{order.deliveryAddress.title}</p>
+            <p className="text-sm text-muted-foreground">{order.deliveryAddress.fullAddress}, {order.deliveryAddress.city}, {order.deliveryAddress.state} - {order.deliveryAddress.pincode}</p>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Payment Info */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <h3 className="font-semibold mb-2">Payment</h3>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Method:</span>
-            <span className="font-medium">{order.paymentMethod}</span>
+            <span className="font-medium">{order.paymentMethod || 'N/A'}</span>
             <Badge variant={order.paymentStatus === 'paid' ? 'success' : 'warning'} className="text-[10px] ml-2">
               {order.paymentStatus.toUpperCase()}
             </Badge>
@@ -168,13 +181,12 @@ export default function TrackOrderPage() {
         </CardContent>
       </Card>
 
-      {/* Review Prompt */}
       {isDelivered && (
         <Card>
           <CardContent className="p-6">
             <h3 className="font-semibold mb-2">Enjoyed your meal?</h3>
             <p className="text-sm text-muted-foreground mb-4">Share your experience and help others decide!</p>
-            <Link href={`/dashboard/reviews`}>
+            <Link href="/dashboard/reviews">
               <Button variant="outline" className="gap-2">Write a Review</Button>
             </Link>
           </CardContent>

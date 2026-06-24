@@ -2,19 +2,33 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { ArrowLeft, MapPin, CreditCard, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useCart } from '@/lib/context/cart-context'
-import { addresses } from '@/lib/data'
+import { address as addressApi } from '@/lib/api'
 import { formatPrice, calculateCartTotal } from '@/lib/utils'
 import CartItemRow from '@/components/features/CartItemRow'
+import type { Address } from '@/types'
 
 export default function CheckoutPage() {
   const router = useRouter()
   const { items } = useCart()
-  const defaultAddress = addresses.find(a => a.isDefault) || addresses[0]
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
+
+  useEffect(() => {
+    addressApi.list().then(setAddresses).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (addresses.length > 0) {
+      setSelectedAddress(addresses.find(a => a.isDefault) || addresses[0])
+    }
+  }, [addresses])
+
   const total = calculateCartTotal(items)
   const deliveryFee = total >= 299 ? 0 : 29
   const grandTotal = total + deliveryFee
@@ -30,7 +44,6 @@ export default function CheckoutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          {/* Address */}
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -38,22 +51,21 @@ export default function CheckoutPage() {
                   <MapPin size={18} className="text-primary" /> Delivery Address
                 </h3>
                 <Link href="/checkout/address" className="text-sm text-primary font-medium hover:underline">
-                  Change
+                  {addresses.length > 0 ? 'Change' : 'Add'}
                 </Link>
               </div>
-              {defaultAddress ? (
+              {selectedAddress ? (
                 <div>
-                  <p className="font-medium">{defaultAddress.title}</p>
-                  <p className="text-sm text-muted-foreground">{defaultAddress.fullAddress}, {defaultAddress.city}, {defaultAddress.state} - {defaultAddress.pincode}</p>
-                  {defaultAddress.landmark && <p className="text-sm text-muted-foreground">Landmark: {defaultAddress.landmark}</p>}
+                  <p className="font-medium">{selectedAddress.title}</p>
+                  <p className="text-sm text-muted-foreground">{selectedAddress.fullAddress}, {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}</p>
+                  {selectedAddress.landmark && <p className="text-sm text-muted-foreground">Landmark: {selectedAddress.landmark}</p>}
                 </div>
               ) : (
-                <Link href="/checkout/address" className="text-sm text-primary font-medium hover:underline">Add Address</Link>
+                <p className="text-sm text-muted-foreground">No address selected</p>
               )}
             </CardContent>
           </Card>
 
-          {/* Payment Method Selection */}
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -79,7 +91,6 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Order Items */}
           <Card>
             <CardContent className="p-6">
               <h3 className="font-semibold mb-4">Order Items ({items.length})</h3>
@@ -92,7 +103,6 @@ export default function CheckoutPage() {
           </Card>
         </div>
 
-        {/* Summary */}
         <div>
           <Card className="sticky top-24">
             <CardContent className="p-6">

@@ -4,9 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ShoppingBag, Menu, X, User, Moon, Sun } from 'lucide-react'
+import { ShoppingBag, Menu, X, User, Moon, Sun, LogOut, LayoutDashboard } from 'lucide-react'
 import { useTheme } from '@/lib/context/theme-context'
 import { useCart } from '@/lib/context/cart-context'
+import { useAuth } from '@/lib/context/auth-context'
 import { NAV_LINKS, SITE_NAME } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -14,6 +15,7 @@ export default function Header() {
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
   const { itemCount } = useCart()
+  const { user, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -56,11 +58,28 @@ export default function Header() {
               </span>
             )}
           </Link>
-          <Link href="/login">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <User size={20} />
-            </Button>
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User size={20} />
+                </Button>
+              </Link>
+              <button
+                onClick={() => logout()}
+                className="rounded-full p-2 text-muted-foreground hover:bg-accent transition-colors hidden md:block"
+                title="Sign out"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <Link href="/login">
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <User size={20} />
+              </Button>
+            </Link>
+          )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="rounded-full p-2 text-muted-foreground hover:bg-accent md:hidden transition-colors"
@@ -87,13 +106,31 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary"
-            >
-              Sign In
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => { logout(); setMobileMenuOpen(false) }}
+                  className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary text-left"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary"
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
         </div>
       )}

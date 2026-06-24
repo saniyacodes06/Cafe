@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/lib/context/theme-context"
 import { CartProvider } from "@/lib/context/cart-context"
+import { AuthProvider } from "@/lib/context/auth-context"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import MobileNav from "@/components/layout/MobileNav"
@@ -27,12 +28,14 @@ export default function RootLayout({
     <html lang="en" className={`${poppins.variable}`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
+          <AuthProvider>
           <CartProvider>
             <Header />
             <main className="flex-1 pb-20 md:pb-0">{children}</main>
             <Footer />
             <MobileNav />
           </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

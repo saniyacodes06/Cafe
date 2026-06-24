@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Check, CreditCard, Smartphone, Landmark, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useCart } from '@/lib/context/cart-context'
+import { orders as ordersApi } from '@/lib/api'
 import { PAYMENT_METHODS } from '@/lib/constants'
 import { formatPrice, calculateCartTotal } from '@/lib/utils'
 import { cn } from '@/lib/utils'
@@ -21,20 +22,36 @@ const paymentIcons: Record<string, React.ElementType> = {
 
 export default function PaymentPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { items, itemCount, clearCart } = useCart()
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
-  
+  const [error, setError] = useState('')
+
   const total = calculateCartTotal(items)
   const deliveryFee = total >= 299 ? 0 : 29
   const grandTotal = total + deliveryFee
 
-  const handlePlaceOrder = () => {
+  const addressId = searchParams.get('addressId') || ''
+
+  const handlePlaceOrder = async () => {
+    if (!selectedMethod || !addressId) return
     setProcessing(true)
-    setTimeout(() => {
+    setError('')
+    try {
+      const orderItems = items.map(i => ({ menuItemId: i.menuItemId, quantity: i.quantity }))
+      const result = await ordersApi.create({
+        addressId,
+        paymentMethod: selectedMethod,
+        items: orderItems,
+      })
       clearCart()
-      router.push(`/orders/ORD-004/track?success=true`)
-    }, 1500)
+      router.push(`/orders/${result.id}/track?success=true`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to place order')
+    } finally {
+      setProcessing(false)
+    }
   }
 
   return (
@@ -99,6 +116,7 @@ export default function PaymentPage() {
                 <span>Total</span>
                 <span className="text-primary">{formatPrice(grandTotal)}</span>
               </div>
+              {error && <p className="text-sm text-destructive mb-4">{error}</p>}
               <Button
                 className="w-full h-12 rounded-xl"
                 disabled={!selectedMethod || processing}
