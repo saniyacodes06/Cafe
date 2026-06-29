@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Poppins } from "next/font/google"
 import "./globals.css"
+import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from "@/lib/context/theme-context"
 import { CartProvider } from "@/lib/context/cart-context"
 import { AuthProvider } from "@/lib/context/auth-context"
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable}`} suppressHydrationWarning>
       <body className="min-h-screen flex flex-col">
+        <ClerkProvider>
         <ThemeProvider>
           <AuthProvider>
           <CartProvider>
@@ -37,6 +39,7 @@ export default function RootLayout({
           </CartProvider>
           </AuthProvider>
         </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   )

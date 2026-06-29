@@ -1,16 +1,15 @@
 import { db, schema } from '@/lib/db';
-import { requireAuth, ok, bad, notFound, serverError } from '@/lib/api-utils';
-import { eq, and, sql } from 'drizzle-orm';
+import { requireUserId, ok, bad, notFound, serverError } from '@/lib/api-utils';
+import { eq, and } from 'drizzle-orm';
 
 export async function GET() {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const [cart] = await db
       .select()
       .from(schema.cart)
-      .where(eq(schema.cart.userId, user.userId))
+      .where(eq(schema.cart.userId, userId))
       .limit(1);
 
     if (!cart) return ok({ items: [] });
@@ -45,8 +44,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const { menuItemId } = await request.json();
     if (!menuItemId) return bad('menuItemId is required');
@@ -63,13 +61,13 @@ export async function POST(request: Request) {
     let [cart] = await db
       .select()
       .from(schema.cart)
-      .where(eq(schema.cart.userId, user.userId))
+      .where(eq(schema.cart.userId, userId))
       .limit(1);
 
     if (!cart) {
       [cart] = await db
         .insert(schema.cart)
-        .values({ userId: user.userId })
+        .values({ userId })
         .returning();
     }
 
@@ -103,8 +101,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const { menuItemId, quantity } = await request.json();
     if (!menuItemId || quantity == null) return bad('menuItemId and quantity are required');
@@ -114,7 +111,7 @@ export async function PATCH(request: Request) {
     const [cart] = await db
       .select()
       .from(schema.cart)
-      .where(eq(schema.cart.userId, user.userId))
+      .where(eq(schema.cart.userId, userId))
       .limit(1);
 
     if (!cart) return notFound('Cart not found');
@@ -151,8 +148,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const { menuItemId } = await request.json();
     if (!menuItemId) return bad('menuItemId is required');
@@ -160,7 +156,7 @@ export async function DELETE(request: Request) {
     const [cart] = await db
       .select()
       .from(schema.cart)
-      .where(eq(schema.cart.userId, user.userId))
+      .where(eq(schema.cart.userId, userId))
       .limit(1);
 
     if (!cart) return ok({ message: 'Cart is empty' });

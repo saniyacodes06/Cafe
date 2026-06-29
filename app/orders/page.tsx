@@ -14,6 +14,7 @@ export default function OrdersPage() {
   useEffect(() => {
     ordersApi.list()
       .then(setOrders)
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 

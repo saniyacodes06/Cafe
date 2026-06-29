@@ -7,6 +7,7 @@ export const orderStatusEnum = pgEnum('order_status', ['pending', 'confirmed', '
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
+  clerkId: text('clerk_id').unique(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   phone: text('phone'),
@@ -61,6 +62,7 @@ export const orders = pgTable('orders', {
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   addressId: integer('address_id').references(() => addresses.id, { onDelete: 'set null' }),
   totalAmount: decimal('total_amount', { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: text('payment_method').default('cod').notNull(),
   paymentStatus: paymentStatusEnum('payment_status').default('pending').notNull(),
   orderStatus: orderStatusEnum('order_status').default('pending').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -77,7 +79,9 @@ export const orderItems = pgTable('order_items', {
 export const payments = pgTable('payments', {
   id: serial('id').primaryKey(),
   orderId: integer('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
-  razorpayPaymentId: text('razorpay_payment_id').notNull(),
+  razorpayPaymentId: text('razorpay_payment_id'),
+  stripeSessionId: text('stripe_session_id'),
+  stripePaymentIntentId: text('stripe_payment_intent_id'),
   amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
   status: text('status').notNull(),
   paidAt: timestamp('paid_at'),

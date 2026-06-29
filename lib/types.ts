@@ -75,6 +75,8 @@ export interface Payment {
   id: string
   orderId: string
   razorpayPaymentId?: string
+  stripeSessionId?: string
+  stripePaymentIntentId?: string
   amount: number
   status: 'pending' | 'paid' | 'failed'
   paidAt?: string

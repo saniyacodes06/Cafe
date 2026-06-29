@@ -14,6 +14,7 @@ export default function DashboardOrdersPage() {
   useEffect(() => {
     ordersApi.list()
       .then(setOrders)
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 

@@ -22,9 +22,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 }
 
 export const PAYMENT_METHODS = [
-  { id: 'upi', label: 'UPI', icon: 'smartphone' },
-  { id: 'card', label: 'Credit / Debit Card', icon: 'credit_card' },
-  { id: 'netbanking', label: 'Net Banking', icon: 'account_balance' },
+  { id: 'stripe', label: 'Pay Online (Card / UPI / Net Banking)', icon: 'credit_card' },
   { id: 'cod', label: 'Cash on Delivery', icon: 'payments' },
 ] as const
 

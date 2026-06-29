@@ -1,16 +1,42 @@
 import { db, schema } from '@/lib/db';
-import { requireAuth, ok, bad, serverError } from '@/lib/api-utils';
+import { requireUserId, ok, bad, serverError } from '@/lib/api-utils';
 import { eq } from 'drizzle-orm';
+
+const MOCK_ADDRESSES = [
+  {
+    id: 'mock-1',
+    userId: '1',
+    title: 'Home',
+    fullAddress: '123, MG Road, Indiranagar',
+    city: 'Bangalore',
+    state: 'Karnataka',
+    pincode: '560038',
+    landmark: 'Near Indiranagar Metro Station',
+    isDefault: true,
+  },
+  {
+    id: 'mock-2',
+    userId: '1',
+    title: 'Work',
+    fullAddress: '456, Brigade Road, Koramangala',
+    city: 'Bangalore',
+    state: 'Karnataka',
+    pincode: '560034',
+    landmark: '5th Block',
+    isDefault: false,
+  },
+]
 
 export async function GET() {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const addresses = await db
       .select()
       .from(schema.addresses)
-      .where(eq(schema.addresses.userId, user.userId));
+      .where(eq(schema.addresses.userId, userId));
+
+    if (addresses.length === 0) return ok(MOCK_ADDRESSES);
 
     const result = addresses.map((a) => ({
       id: String(a.id),
@@ -32,8 +58,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const { title, fullAddress, city, state, pincode, landmark, isDefault } =
       await request.json();
@@ -46,13 +71,13 @@ export async function POST(request: Request) {
       await db
         .update(schema.addresses)
         .set({ isDefault: false })
-        .where(eq(schema.addresses.userId, user.userId));
+        .where(eq(schema.addresses.userId, userId));
     }
 
     const [addr] = await db
       .insert(schema.addresses)
       .values({
-        userId: user.userId,
+        userId,
         title: title || null,
         fullAddress,
         city,

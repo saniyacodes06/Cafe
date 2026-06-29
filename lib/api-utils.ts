@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAuthUser } from './auth';
+import { requireUserId } from './clerk-auth';
 
 export function ok(data: unknown, status = 200) {
   return NextResponse.json(data, { status });
@@ -30,10 +30,4 @@ export function serverError(error: unknown) {
   return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 }
 
-export async function requireAuth() {
-  const user = await getAuthUser();
-  if (!user) {
-    return { user: null as never, error: unauthorized() } as const;
-  }
-  return { user, error: null as never } as const;
-}
+export { requireUserId };

@@ -27,22 +27,25 @@ export default function AddressPage() {
         const defaultAddr = data.find(a => a.isDefault) || data[0]
         if (defaultAddr) setSelectedAddress(defaultAddr.id)
       })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    const form = e.target as HTMLFormElement
-    const title = (form.elements.namedItem('title') as HTMLInputElement).value
-    const pincode = (form.elements.namedItem('pincode') as HTMLInputElement).value
-    const fullAddress = (form.elements.namedItem('address') as HTMLTextAreaElement).value
-    const city = (form.elements.namedItem('city') as HTMLInputElement).value
-    const state = (form.elements.namedItem('state') as HTMLInputElement).value
-    const landmark = (form.elements.namedItem('landmark') as HTMLInputElement).value
-    await addressApi.create({ title, pincode, fullAddress, city, state, landmark })
-    const updated = await addressApi.list()
-    setAddresses(updated)
-    setShowAddForm(false)
+    try {
+      const form = e.target as HTMLFormElement
+      const title = (form.elements.namedItem('title') as HTMLInputElement).value
+      const pincode = (form.elements.namedItem('pincode') as HTMLInputElement).value
+      const fullAddress = (form.elements.namedItem('address') as HTMLTextAreaElement).value
+      const city = (form.elements.namedItem('city') as HTMLInputElement).value
+      const state = (form.elements.namedItem('state') as HTMLInputElement).value
+      const landmark = (form.elements.namedItem('landmark') as HTMLInputElement).value
+      await addressApi.create({ title, pincode, fullAddress, city, state, landmark })
+      const updated = await addressApi.list()
+      setAddresses(updated)
+      setShowAddForm(false)
+    } catch {}
   }
 
   return (

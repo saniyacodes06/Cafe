@@ -1,7 +1,7 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
-import { auth as authApi } from '@/lib/api'
+import { createContext, useContext, type ReactNode } from 'react'
+import { useUser, useClerk } from '@clerk/nextjs'
 import type { User } from '@/types'
 
 interface AuthContextType {
@@ -16,39 +16,27 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { isLoaded, isSignedIn, user: clerkUser } = useUser()
+  const clerk = useClerk()
 
-  const refresh = useCallback(async () => {
-    try {
-      const u = await authApi.me()
-      setUser(u)
-    } catch {
-      setUser(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const user: User | null = isSignedIn && clerkUser
+    ? {
+        id: clerkUser.id,
+        name: clerkUser.fullName || clerkUser.firstName || 'User',
+        email: clerkUser.primaryEmailAddress?.emailAddress || '',
+        phone: clerkUser.primaryPhoneNumber?.phoneNumber || '',
+        role: 'customer',
+        createdAt: clerkUser.createdAt?.toISOString() || new Date().toISOString(),
+      }
+    : null
 
-  useEffect(() => { refresh() }, [refresh])
-
-  const login = async (email: string, password: string) => {
-    const res = await authApi.login({ email, password })
-    setUser(res.user)
-  }
-
-  const signup = async (name: string, email: string, password: string, phone?: string) => {
-    const res = await authApi.signup({ name, email, phone, password })
-    setUser(res.user)
-  }
-
-  const logout = async () => {
-    await authApi.logout()
-    setUser(null)
-  }
+  const login = async () => { clerk.openSignIn() }
+  const signup = async () => { clerk.openSignUp() }
+  const logout = async () => { clerk.signOut() }
+  const refresh = async () => {}
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading: !isLoaded, login, signup, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   )

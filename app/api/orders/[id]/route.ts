@@ -1,25 +1,20 @@
 import { db, schema } from '@/lib/db';
-import { requireAuth, ok, notFound, serverError } from '@/lib/api-utils';
-import { eq, and } from 'drizzle-orm';
+import { requireUserId, ok, notFound, serverError } from '@/lib/api-utils';
+import { eq } from 'drizzle-orm';
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
-
+    await requireUserId();
     const { id } = await params;
-    const orderNum = Number(id.replace('ORD-', ''));
-    if (isNaN(orderNum)) return notFound('Invalid order ID');
 
+    const orderNum = Number(id.replace('ORD-', ''));
     const [order] = await db
       .select()
       .from(schema.orders)
-      .where(
-        and(eq(schema.orders.id, orderNum), eq(schema.orders.userId, user.userId))
-      )
+      .where(eq(schema.orders.id, orderNum))
       .limit(1);
 
     if (!order) return notFound('Order not found');
@@ -59,16 +54,6 @@ export async function GET(
       }
     }
 
-    const paymentStatus = order.paymentStatus === 'paid' ? 'paid' as const : order.paymentStatus === 'failed' ? 'failed' as const : 'pending' as const;
-    const orderStatusMap: Record<string, 'placed' | 'accepted' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled'> = {
-      pending: 'placed',
-      confirmed: 'accepted',
-      preparing: 'preparing',
-      out_for_delivery: 'out_for_delivery',
-      delivered: 'delivered',
-      cancelled: 'cancelled',
-    };
-
     return ok({
       id: `ORD-${String(order.id).padStart(3, '0')}`,
       userId: String(order.userId),
@@ -82,13 +67,25 @@ export async function GET(
         imageUrl: i.imageUrl || '/placeholder.svg',
       })),
       totalAmount: Number(order.totalAmount),
-      paymentStatus,
-      orderStatus: orderStatusMap[order.orderStatus] || 'placed',
+      paymentStatus: order.paymentStatus === 'paid' ? 'paid' as const : order.paymentStatus === 'failed' ? 'failed' as const : 'pending' as const,
+      orderStatus: mapOrderStatus(order.orderStatus),
       createdAt: order.createdAt.toISOString(),
       deliveryAddress,
-      paymentMethod: '',
+      paymentMethod: order.paymentMethod || '',
     });
   } catch (error) {
     return serverError(error);
   }
+}
+
+function mapOrderStatus(status: string): 'placed' | 'accepted' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled' {
+  const map: Record<string, 'placed' | 'accepted' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled'> = {
+    pending: 'placed',
+    confirmed: 'accepted',
+    preparing: 'preparing',
+    out_for_delivery: 'out_for_delivery',
+    delivered: 'delivered',
+    cancelled: 'cancelled',
+  };
+  return map[status] || 'placed';
 }

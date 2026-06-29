@@ -1,30 +1,20 @@
-import { db, schema } from '@/lib/db';
-import { getAuthUser } from '@/lib/auth';
-import { ok, unauthorized, notFound, serverError } from '@/lib/api-utils';
-import { eq } from 'drizzle-orm';
+import { currentUser } from '@clerk/nextjs/server'
+import { ok, notFound, serverError } from '@/lib/api-utils'
 
 export async function GET() {
   try {
-    const auth = await getAuthUser();
-    if (!auth) return unauthorized();
-
-    const [user] = await db
-      .select()
-      .from(schema.users)
-      .where(eq(schema.users.id, auth.userId))
-      .limit(1);
-
-    if (!user) return notFound('User not found');
+    const clerkUser = await currentUser()
+    if (!clerkUser) return notFound('User not found')
 
     return ok({
-      id: String(user.id),
-      name: user.name,
-      email: user.email,
-      phone: user.phone || '',
-      role: user.role,
-      createdAt: user.createdAt.toISOString(),
-    });
+      id: clerkUser.id,
+      name: clerkUser.fullName || clerkUser.firstName || 'User',
+      email: clerkUser.primaryEmailAddress?.emailAddress || '',
+      phone: clerkUser.primaryPhoneNumber?.phoneNumber || '',
+      role: 'customer',
+      createdAt: clerkUser.createdAt?.toISOString() || new Date().toISOString(),
+    })
   } catch (error) {
-    return serverError(error);
+    return serverError(error)
   }
 }

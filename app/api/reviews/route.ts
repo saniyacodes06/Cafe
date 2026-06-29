@@ -1,5 +1,5 @@
 import { db, schema } from '@/lib/db';
-import { requireAuth, ok, bad, serverError } from '@/lib/api-utils';
+import { requireUserId, ok, bad, serverError } from '@/lib/api-utils';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: Request) {
@@ -62,8 +62,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const { menuItemId, rating, comment } = await request.json();
 
@@ -80,7 +79,7 @@ export async function POST(request: Request) {
       .select()
       .from(schema.reviews)
       .where(
-        eq(schema.reviews.userId, user.userId) && eq(schema.reviews.menuItemId, Number(menuItemId))
+        eq(schema.reviews.userId, userId) && eq(schema.reviews.menuItemId, Number(menuItemId))
       )
       .limit(1);
 
@@ -91,7 +90,7 @@ export async function POST(request: Request) {
     const [review] = await db
       .insert(schema.reviews)
       .values({
-        userId: user.userId,
+        userId,
         menuItemId: Number(menuItemId),
         rating: ratingNum,
         comment: comment || null,

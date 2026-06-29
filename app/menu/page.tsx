@@ -21,6 +21,7 @@ export default function MenuPage() {
         setItems(menuData)
         setCats(catData)
       })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 

@@ -14,6 +14,7 @@ export default function DashboardReviewsPage() {
   useEffect(() => {
     reviewsApi.list()
       .then(setReviews)
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 

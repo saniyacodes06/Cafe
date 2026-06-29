@@ -19,35 +19,39 @@ export default function DashboardAddressesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const fetchAddresses = () =>
-    addressApi.list().then(setAddresses).finally(() => setLoading(false))
+    addressApi.list().then(setAddresses).catch(() => {}).finally(() => setLoading(false))
 
   useEffect(() => { fetchAddresses() }, [])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    const form = e.target as HTMLFormElement
-    const data = {
-      title: (form.elements.namedItem('title') as HTMLInputElement).value,
-      pincode: (form.elements.namedItem('pincode') as HTMLInputElement).value,
-      fullAddress: (form.elements.namedItem('address') as HTMLTextAreaElement).value,
-      city: (form.elements.namedItem('city') as HTMLInputElement).value,
-      state: (form.elements.namedItem('state') as HTMLInputElement).value,
-      landmark: (form.elements.namedItem('landmark') as HTMLInputElement).value,
-      isDefault: addresses.length === 0,
-    }
-    if (editingId) {
-      await addressApi.update(editingId, data)
-    } else {
-      await addressApi.create(data)
-    }
-    setShowForm(false)
-    setEditingId(null)
-    fetchAddresses()
+    try {
+      const form = e.target as HTMLFormElement
+      const data = {
+        title: (form.elements.namedItem('title') as HTMLInputElement).value,
+        pincode: (form.elements.namedItem('pincode') as HTMLInputElement).value,
+        fullAddress: (form.elements.namedItem('address') as HTMLTextAreaElement).value,
+        city: (form.elements.namedItem('city') as HTMLInputElement).value,
+        state: (form.elements.namedItem('state') as HTMLInputElement).value,
+        landmark: (form.elements.namedItem('landmark') as HTMLInputElement).value,
+        isDefault: addresses.length === 0,
+      }
+      if (editingId) {
+        await addressApi.update(editingId, data)
+      } else {
+        await addressApi.create(data)
+      }
+      setShowForm(false)
+      setEditingId(null)
+      fetchAddresses()
+    } catch {}
   }
 
   const handleDelete = async (id: string) => {
-    await addressApi.delete(id)
-    fetchAddresses()
+    try {
+      await addressApi.delete(id)
+      fetchAddresses()
+    } catch {}
   }
 
   if (loading) {

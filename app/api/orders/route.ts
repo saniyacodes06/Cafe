@@ -1,16 +1,15 @@
 import { db, schema } from '@/lib/db';
-import { requireAuth, ok, bad, notFound, serverError } from '@/lib/api-utils';
+import { requireUserId, ok, bad, notFound, serverError } from '@/lib/api-utils';
 import { eq, and, inArray, desc } from 'drizzle-orm';
 
 export async function GET() {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const ordersData = await db
       .select()
       .from(schema.orders)
-      .where(eq(schema.orders.userId, user.userId))
+      .where(eq(schema.orders.userId, userId))
       .orderBy(desc(schema.orders.createdAt));
 
     const result = await Promise.all(
@@ -67,7 +66,7 @@ export async function GET() {
           orderStatus: mapOrderStatus(order.orderStatus),
           createdAt: order.createdAt.toISOString(),
           deliveryAddress,
-          paymentMethod: '',
+          paymentMethod: order.paymentMethod || '',
         };
       })
     );
@@ -92,8 +91,7 @@ function mapOrderStatus(status: string): 'placed' | 'accepted' | 'preparing' | '
 
 export async function POST(request: Request) {
   try {
-    const { user, error } = await requireAuth();
-    if (error) return error;
+    const userId = await requireUserId();
 
     const { addressId, paymentMethod, items: orderItemsData } = await request.json();
 
@@ -101,15 +99,18 @@ export async function POST(request: Request) {
       return bad('Address and items are required');
     }
 
-    const [address] = await db
-      .select()
-      .from(schema.addresses)
-      .where(
-        and(eq(schema.addresses.id, Number(addressId)), eq(schema.addresses.userId, user.userId))
-      )
-      .limit(1);
-
-    if (!address) return bad('Invalid address');
+    let resolvedAddressId: number | null = null;
+    if (!addressId.startsWith('mock-')) {
+      const [address] = await db
+        .select()
+        .from(schema.addresses)
+        .where(
+          and(eq(schema.addresses.id, Number(addressId)), eq(schema.addresses.userId, userId))
+        )
+        .limit(1);
+      if (!address) return bad('Invalid address');
+      resolvedAddressId = address.id;
+    }
 
     const menuItemIds = orderItemsData.map((i: { menuItemId: string }) => Number(i.menuItemId));
     const menuItems = await db
@@ -125,9 +126,10 @@ export async function POST(request: Request) {
     const [order] = await db
       .insert(schema.orders)
       .values({
-        userId: user.userId,
-        addressId: Number(addressId),
+        userId,
+        addressId: resolvedAddressId,
         totalAmount: String(totalAmount),
+        paymentMethod: paymentMethod || 'cod',
         paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
         orderStatus: 'pending',
       })
@@ -148,7 +150,7 @@ export async function POST(request: Request) {
     const [cart] = await db
       .select()
       .from(schema.cart)
-      .where(eq(schema.cart.userId, user.userId))
+      .where(eq(schema.cart.userId, userId))
       .limit(1);
 
     if (cart) {
@@ -168,4 +170,3 @@ export async function POST(request: Request) {
     return serverError(error);
   }
 }
-

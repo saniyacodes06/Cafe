@@ -31,6 +31,7 @@ export default function TrackOrderPage() {
   useEffect(() => {
     ordersApi.get(params.id as string)
       .then(setOrder)
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [params.id])
 

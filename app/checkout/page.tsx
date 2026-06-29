@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { ArrowLeft, MapPin, CreditCard, ChevronRight } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { MapPin, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -13,8 +13,9 @@ import { formatPrice, calculateCartTotal } from '@/lib/utils'
 import CartItemRow from '@/components/features/CartItemRow'
 import type { Address } from '@/types'
 
-export default function CheckoutPage() {
+function CheckoutPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { items } = useCart()
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
@@ -25,9 +26,11 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (addresses.length > 0) {
-      setSelectedAddress(addresses.find(a => a.isDefault) || addresses[0])
+      const fromParam = searchParams.get('addressId')
+      const match = fromParam ? addresses.find(a => a.id === fromParam) : null
+      setSelectedAddress(match || addresses.find(a => a.isDefault) || addresses[0])
     }
-  }, [addresses])
+  }, [addresses, searchParams])
 
   const total = calculateCartTotal(items)
   const deliveryFee = total >= 299 ? 0 : 29
@@ -68,31 +71,6 @@ export default function CheckoutPage() {
 
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <CreditCard size={18} className="text-primary" /> Payment Method
-                </h3>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { id: 'upi', label: 'UPI', icon: '💳' },
-                  { id: 'card', label: 'Card', icon: '💳' },
-                  { id: 'netbanking', label: 'Net Banking', icon: '🏦' },
-                  { id: 'cod', label: 'Cash on Delivery', icon: '💵' },
-                ].map((method) => (
-                  <Link key={method.id} href={`/checkout/payment?method=${method.id}`}>
-                    <div className="flex items-center gap-3 rounded-xl border border-border p-4 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer">
-                      <span className="text-2xl">{method.icon}</span>
-                      <span className="text-sm font-medium">{method.label}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
               <h3 className="font-semibold mb-4">Order Items ({items.length})</h3>
               <div>
                 {items.map((item) => (
@@ -124,7 +102,8 @@ export default function CheckoutPage() {
               </div>
               <Button
                 className="w-full h-12 rounded-xl gap-2"
-                onClick={() => router.push('/checkout/payment')}
+                disabled={!selectedAddress}
+                onClick={() => router.push(`/checkout/payment?addressId=${selectedAddress!.id}`)}
               >
                 Place Order <ChevronRight size={16} />
               </Button>
@@ -133,5 +112,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense>
+      <CheckoutPageInner />
+    </Suspense>
   )
 }

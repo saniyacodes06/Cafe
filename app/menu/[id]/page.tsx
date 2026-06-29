@@ -28,6 +28,7 @@ export default function ProductDetailPage() {
         setItem(data.item)
         setReviews(data.reviews)
       })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [params.id])
 
