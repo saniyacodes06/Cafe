@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Check, Clock, ChefHat, Truck, CheckCircle, MapPin, Package } from 'lucide-react'
+import { ArrowLeft, Check, Clock, ChefHat, Truck, CheckCircle, MapPin, Package, Clock as ClockIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -59,6 +59,17 @@ export default function TrackOrderPage() {
 
   const currentIndex = ORDER_STATUS_FLOW.indexOf(order.orderStatus as typeof ORDER_STATUS_FLOW[number])
   const isDelivered = order.orderStatus === 'delivered'
+
+  // Calculate estimated delivery time (20-30 minutes)
+  const getEstimatedTime = () => {
+    if (isDelivered) return 'Delivered'
+    if (currentIndex <= 0) return '20-30 min'
+    if (currentIndex <= 2) return '15-25 min'
+    if (currentIndex <= 3) return '5-15 min'
+    return 'Arriving soon'
+  }
+
+  const estimatedTime = getEstimatedTime()
 
   return (
     <div className="mx-auto max-w-[800px] px-4 md:px-10 py-8">
@@ -127,6 +138,20 @@ export default function TrackOrderPage() {
                 </div>
               )
             })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6 border-primary/20 bg-primary/5">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <ClockIcon className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Estimated Delivery</p>
+              <p className="text-xl font-bold text-primary">{estimatedTime}</p>
+            </div>
           </div>
         </CardContent>
       </Card>

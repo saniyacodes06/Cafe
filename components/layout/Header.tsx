@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
-import { ShoppingBag, Menu, X, Moon, Sun, User } from 'lucide-react'
+import { ShoppingBag, Menu, X, Moon, Sun, User, LayoutDashboard, LogOut } from 'lucide-react'
 import { useTheme } from '@/lib/context/theme-context'
 import { useCart } from '@/lib/context/cart-context'
 import { NAV_LINKS, SITE_NAME } from '@/lib/constants'
@@ -59,7 +59,16 @@ export default function Header() {
             )}
           </Link>
           {isSignedIn ? (
-            <UserButton afterSignOutUrl="/" />
+            <div className="flex items-center gap-2">
+              <Link
+                href="/profile"
+                className="rounded-full p-2 text-muted-foreground hover:bg-accent transition-colors"
+                aria-label="Profile"
+              >
+                <User size={20} />
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </div>
           ) : (
             <SignInButton mode="modal">
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -96,18 +105,28 @@ export default function Header() {
             {isSignedIn ? (
               <>
                 <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary flex items-center gap-2"
+                >
+                  <User size={16} />
+                  Profile
+                </Link>
+                <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary"
+                  className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary flex items-center gap-2"
                 >
+                  <LayoutDashboard size={16} />
                   Dashboard
                 </Link>
                 <form method="post" action="/api/auth/logout" className="text-left">
                   <button
                     type="submit"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary text-left w-full"
+                    className="text-sm font-semibold uppercase tracking-wider py-2 text-muted-foreground hover:text-primary text-left w-full flex items-center gap-2"
                   >
+                    <LogOut size={16} />
                     Sign Out
                   </button>
                 </form>

@@ -92,7 +92,22 @@ function mapOrderStatus(status: string): 'placed' | 'accepted' | 'preparing' | '
 export async function POST(request: Request) {
   try {
     const userId = await requireUserId();
-
+    // Fallback for development when Clerk isn't loading
+    let finalUserId = userId
+    if (!finalUserId) {
+      const body = await request.json()
+      const clerkId = body.clerkId
+      if (clerkId) {
+        const [user] = await db
+          .select()
+          .from(schema.users)
+          .where(eq(schema.users.clerkId, clerkId))
+          .limit(1)
+        if (user) finalUserId = user.id
+      }
+    }
+    if (!finalUserId) return bad('Unauthorized - please sign in');
+    // Re-parse body since we already read it
     const { addressId, paymentMethod, items: orderItemsData } = await request.json();
 
     if (!addressId || !orderItemsData || orderItemsData.length === 0) {

@@ -5,6 +5,7 @@ export const SITE_DESCRIPTION = 'Experience premium café cuisine crafted from t
 export const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Menu', href: '/menu' },
+  { label: 'Book Table', href: '/book-table' },
   { label: 'About', href: '/about' },
   { label: 'Gallery', href: '/gallery' },
   { label: 'Contact', href: '/contact' },

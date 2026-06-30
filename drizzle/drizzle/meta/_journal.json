@@ -29,6 +29,13 @@
       "when": 1782450000000,
       "tag": "0003_colossal_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782806313935,
+      "tag": "0004_steep_proudstar",
+      "breakpoints": true
     }
   ]
 }

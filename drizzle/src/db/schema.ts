@@ -87,6 +87,28 @@ export const payments = pgTable('payments', {
   paidAt: timestamp('paid_at'),
 });
 
+export const tableTypeEnum = pgEnum('table_type', ['single', 'couple', 'family']);
+export const tableStatusEnum = pgEnum('table_status', ['available', 'booked', 'occupied']);
+
+export const tables = pgTable('tables', {
+  id: serial('id').primaryKey(),
+  tableNumber: integer('table_number').notNull().unique(),
+  type: tableTypeEnum('type').notNull(),
+  capacity: integer('capacity').notNull(),
+  status: tableStatusEnum('status').default('available').notNull(),
+});
+
+export const tableBookings = pgTable('table_bookings', {
+  id: serial('id').primaryKey(),
+  tableId: integer('table_id').notNull().references(() => tables.id, { onDelete: 'cascade' }),
+  userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  bookingDate: timestamp('booking_date').notNull(),
+  bookingTime: text('booking_time').notNull(),
+  partySize: integer('party_size').notNull(),
+  status: text('status').default('confirmed').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export const reviews = pgTable('reviews', {
   id: serial('id').primaryKey(),
   userId: integer('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),

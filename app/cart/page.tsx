@@ -9,6 +9,7 @@ import { useCart } from '@/lib/context/cart-context'
 import { formatPrice, calculateCartTotal } from '@/lib/utils'
 import CartItemRow from '@/components/features/CartItemRow'
 import EmptyState from '@/components/features/EmptyState'
+import { toast } from 'sonner'
 
 export default function CartPage() {
   const router = useRouter()
@@ -31,11 +32,20 @@ export default function CartPage() {
     )
   }
 
+  const handleClearCart = async () => {
+    try {
+      await clearCart()
+      toast.success('Cart cleared')
+    } catch {
+      toast.error('Failed to clear cart')
+    }
+  }
+
   return (
     <div className="mx-auto max-w-[1200px] px-4 md:px-10 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Your Cart</h1>
-        <Button variant="ghost" size="sm" onClick={clearCart} className="text-destructive">
+        <Button variant="ghost" size="sm" onClick={handleClearCart} className="text-destructive">
           Clear All
         </Button>
       </div>

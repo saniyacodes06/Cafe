@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 const mobileLinks = [
   { label: 'Home', href: '/', icon: Home },
   { label: 'Menu', href: '/menu', icon: UtensilsCrossed },
+  { label: 'Book Table', href: '/book-table', icon: UtensilsCrossed },
   { label: 'Cart', href: '/cart', icon: ShoppingBag },
   { label: 'Orders', href: '/orders', icon: ClipboardList },
   { label: 'Profile', href: '/dashboard', icon: User },

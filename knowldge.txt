@@ -1,0 +1,73 @@
+# Feature Documentation
+
+## Feature 1: Stripe Payment Integration with Product Images
+**Prompt**: Fix Stripe checkout session error "Not a valid URL" for product images
+**Why**: Stripe requires absolute URLs for product images in checkout sessions, but the database stored relative paths like `/pizza/margarita.jpg`
+**How**: 
+- Added `NEXT_PUBLIC_DOMAIN=http://localhost:3000` to `.env.local`
+- Modified `app/actions/stripe.ts` to prepend domain to image URLs: `${DOMAIN}${menuItem.imageUrl}`
+- Restart dev server for env changes to take effect
+
+---
+
+## Feature 2: Table Booking System (17 Tables)
+**Prompt**: Create table booking feature with 17 tables (single, couple, family), show availability by time slot, prevent double booking, show booked tables in profile
+**Why**: Restaurant needs dine-in reservation system with time-based availability and capacity management
+**How**:
+- Added `tables` and `tableBookings` tables to `drizzle/src/db/schema.ts` with enums for table_type (single/couple/family) and booking_status
+- Seeded 17 tables in `drizzle/seed.ts`: 3 single (1 seat), 5 couple (2 seats), 9 family (4-8 seats)
+- Created API routes:
+  - `GET /api/tables` - list all tables
+  - `GET /api/table-bookings/availability?date=&startTime=&endTime=&type=` - check available tables for time slot
+  - `POST /api/table-bookings` - create booking with conflict detection
+  - `GET /api/table-bookings` - fetch user's bookings
+  - `DELETE /api/table-bookings/[id]` - cancel booking
+- Created `/book-table` page with date/time/type filters, real-time availability, booking confirmation
+- Added "Table Bookings" tab to `/tab to `/profile` page showing upcoming/past bookings with cancel option
+- Auto-update table status to 'booked' on confirmed booking
+
+---
+
+## Feature 3: Profile Page with Order History & Table Bookings
+**Prompt**: Create profile section showing order history, table bookings, and account settings
+**Why**: Users need a central place to view past orders, manage reservations, and update account info
+**How**:
+- Created `/app/profile/page.tsx` with 3 tabs: Orders, Table Bookings, Settings
+- Orders tab: expandable order cards showing items, prices, status badges, delivery address
+- Bookings tab: shows table number, type, date/time, party size, status, cancel button for confirmed bookings
+- Settings tab: editable profile fields (name, email, phone), danger zone for account deletion
+- Fetches data from `/api/orders`, `/api/table-bookings`, `/api/auth/me`
+
+---
+
+## Feature 4: Order Tracking with 20-30 Min Delivery Estimate
+**Prompt**: Fix order tracking page to show "20-30 minutes" estimated delivery time based on order status
+**Why**: Users need realistic delivery estimates that update as order progresses
+**How**:
+- Modified `/app/orders/[id]/track/page.tsx` to calculate dynamic estimate:
+  - Placed: 20-30 min
+  - Accepted: 15-25 min  
+  - Preparing: 10-20 min
+  - Out for delivery: 5-15 min
+  - Delivered: "Delivered"
+- Added prominent estimate card with clock icon at top of tracking page
+
+---
+
+## Feature 5: 15% Discount for Table Bookings at Checkout
+**Prompt**: Apply 15% discount automatically at checkout if user has a confirmed table booking for that time
+**Why**: Incentivize dine-in reservations
+**How**:
+- Added `discountApplied` field to `tableBookings` table
+- In `app/actions/stripe.ts` createCheckoutSession:
+  - Check for active booking on order date/time before creating Stripe session
+  - If booking exists, apply 15% discount via Stripe coupon or line item adjustment
+  - Mark booking `discountApplied = true` to prevent reuse
+- Discount only applies once per booking
+
+---
+
+## Feature 6: Knowledge Documentation
+**Prompt**: Maintain knowledge.txt with feature documentation in simple 3-4 line format: Feature, Why, How
+**Why**: Track implementation decisions for future reference and team onboarding
+**How**: Created `knowledge.txt` at project root with structured entries for each feature including prompt, rationale, and technical approach

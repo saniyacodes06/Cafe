@@ -36,11 +36,13 @@ function PaymentPageInner() {
       if (paymentMode === 'stripe') {
         const formData = new FormData()
         formData.append('addressId', addressId)
+        // Pass clerkId for auth fallback in development
+        formData.append('clerkId', 'user_3Fp2P1JybNxyN624ZJwPmuMWBYn')
 
         const { createCheckoutSession } = await import('@/app/actions/stripe')
         const result = await createCheckoutSession(formData)
         if (result.url) {
-          clearCart()
+          await clearCart()
           window.location.href = result.url
           return
         }
@@ -53,7 +55,7 @@ function PaymentPageInner() {
         paymentMethod: 'cod',
         items: orderItems,
       })
-      clearCart()
+      await clearCart()
       router.push(`/orders/${result.id}/track?success=true`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to place order')

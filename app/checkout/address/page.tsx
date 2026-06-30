@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { address as addressApi } from '@/lib/api'
 import type { Address } from '@/types'
+import { toast } from 'sonner'
 
 export default function AddressPage() {
   const router = useRouter()
@@ -42,10 +43,14 @@ export default function AddressPage() {
       const state = (form.elements.namedItem('state') as HTMLInputElement).value
       const landmark = (form.elements.namedItem('landmark') as HTMLInputElement).value
       await addressApi.create({ title, pincode, fullAddress, city, state, landmark })
+      toast.success('Address saved successfully')
       const updated = await addressApi.list()
       setAddresses(updated)
       setShowAddForm(false)
-    } catch {}
+      form.reset()
+    } catch {
+      toast.error('Failed to save address')
+    }
   }
 
   return (

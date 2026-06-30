@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as import('stripe').Stripe.Checkout.Session
     const orderId = session.metadata?.orderId
+    const cartId = session.metadata?.cartId
 
     if (!orderId) {
       console.error('No orderId in session metadata')
@@ -47,6 +48,12 @@ export async function POST(request: NextRequest) {
         status: 'paid',
         paidAt: new Date(),
       })
+
+      // Clear the cart after successful payment
+      if (cartId) {
+        await db.delete(schema.cartItems).where(eq(schema.cartItems.cartId, Number(cartId)))
+        await db.delete(schema.cart).where(eq(schema.cart.id, Number(cartId)))
+      }
     } catch (err) {
       console.error('Failed to update order payment:', err)
       return NextResponse.json({ error: 'Database update failed' }, { status: 500 })

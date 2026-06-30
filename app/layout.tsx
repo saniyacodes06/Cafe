@@ -5,6 +5,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from "@/lib/context/theme-context"
 import { CartProvider } from "@/lib/context/cart-context"
 import { AuthProvider } from "@/lib/context/auth-context"
+import { Toaster } from "@/components/ui/toast"
 import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 import MobileNav from "@/components/layout/MobileNav"
@@ -36,6 +37,7 @@ export default function RootLayout({
             <main className="flex-1 pb-20 md:pb-0">{children}</main>
             <Footer />
             <MobileNav />
+            <Toaster />
           </CartProvider>
           </AuthProvider>
         </ThemeProvider>

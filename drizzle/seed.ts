@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '../.env.local' });
 
 import { db, schema } from '../lib/db';
 
@@ -10,6 +10,26 @@ const categoriesData = [
   { name: 'Fries', slug: 'fries', imageUrl: '/placeholder.svg' },
   { name: 'Beverages', slug: 'beverages', imageUrl: '/placeholder.svg' },
   { name: 'Desserts', slug: 'desserts', imageUrl: '/placeholder.svg' },
+];
+
+const tablesData = [
+  { tableNumber: 1, type: 'single', capacity: 1 },
+  { tableNumber: 2, type: 'single', capacity: 1 },
+  { tableNumber: 3, type: 'single', capacity: 1 },
+  { tableNumber: 4, type: 'couple', capacity: 2 },
+  { tableNumber: 5, type: 'couple', capacity: 2 },
+  { tableNumber: 6, type: 'couple', capacity: 2 },
+  { tableNumber: 7, type: 'couple', capacity: 2 },
+  { tableNumber: 8, type: 'couple', capacity: 2 },
+  { tableNumber: 9, type: 'family', capacity: 4 },
+  { tableNumber: 10, type: 'family', capacity: 4 },
+  { tableNumber: 11, type: 'family', capacity: 4 },
+  { tableNumber: 12, type: 'family', capacity: 4 },
+  { tableNumber: 13, type: 'family', capacity: 6 },
+  { tableNumber: 14, type: 'family', capacity: 6 },
+  { tableNumber: 15, type: 'family', capacity: 6 },
+  { tableNumber: 16, type: 'family', capacity: 8 },
+  { tableNumber: 17, type: 'family', capacity: 8 },
 ];
 
 const menuItemsData = [
@@ -39,6 +59,9 @@ async function seed() {
 
   await db.insert(schema.categories).values(categoriesData).onConflictDoNothing();
   console.log('Categories inserted');
+
+  await db.insert(schema.tables).values(tablesData).onConflictDoNothing();
+  console.log('Tables inserted');
 
   const cats = await db.select().from(schema.categories);
 
